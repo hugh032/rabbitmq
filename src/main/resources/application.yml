@@ -1,0 +1,11 @@
+server:
+  port: 7777
+spring:
+  application:
+    name: rabbit-demo
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: hugh
+    password: 123456
+    virtual-host: /vhost_hugh
