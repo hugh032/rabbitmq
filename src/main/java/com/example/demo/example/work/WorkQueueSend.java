@@ -22,7 +22,7 @@ public class WorkQueueSend {
         Connection connection = RabbitConnectionUtils.getConnection2();
         Channel channel = connection.createChannel();
         channel.queueDeclare(WORK_QUEUE_NAME,false,false,false,null);
-        for (int i = 0; i <10 ; i++) {
+        for (int i = 0; i <20 ; i++) {
             String message = "男嘉宾_"+i;
             System.out.println("work queue send..."+message);
             channel.basicPublish("", WORK_QUEUE_NAME, null, message.getBytes());
