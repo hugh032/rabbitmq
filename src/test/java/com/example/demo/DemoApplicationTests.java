@@ -28,12 +28,5 @@ class DemoApplicationTests {
 
     @Test
     public void test_send() {
-        System.out.println("***");
-        System.out.println(rabbitTemplate);
-        Message message = new Message();
-        message.setMessageId(UUID.randomUUID().toString());
-        message.setMessageContent("aaaa");
-        message.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        rabbitTemplate.convertAndSend("simple_queue");
     }
 }
