@@ -10,11 +10,10 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-
 /**
  * 死信交换机 队列监听
- * @Author hugh
+ *
+ * @Author zhaojun
  * @create 2020/1/22 17:31
  */
 @Component
@@ -51,6 +50,7 @@ public class AmqpListener {
 
     /**
      * example1 手动创建队列，需要在rabbitmq后台创建queue，否则启动报错
+     *
      * @param message
      */
     @RabbitListener(queues = "test_queue_1")
@@ -60,70 +60,72 @@ public class AmqpListener {
 
     /**
      * example2 自动创建队列
+     *
      * @param message
      */
-    @RabbitListener(queuesToDeclare = @Queue(value = "test_queue_2",durable ="true"))
-    public void example2(String message){
+    @RabbitListener(queuesToDeclare = @Queue(value = "test_queue_2", durable = "true"))
+    public void example2(String message) {
         logger.info(message);
     }
+
     /**
      * example3 自动创建队列，并且声明exchange交换机，绑定queue
+     *
      * @param message
      */
     @RabbitListener(bindings = @QueueBinding(
-            value = @Queue( value = "test_queue_3"),
-            exchange = @Exchange(value = "test_exchange_1"),key = "test_routing_key_1"
+            value = @Queue(value = "test_queue_3"),
+            exchange = @Exchange(value = "test_exchange_1"), key = "test_routing_key_1"
     ))
-    public void example3(String message){
+    public void example3(String message) {
         logger.info(message);
     }
 
     /**
-     *  订单自动取消queue
+     * 订单自动取消queue
+     *
      * @param message
      */
     @RabbitListener(bindings = @QueueBinding(
-            value = @Queue( value = QUEUE_ORDERS_CANCEL),
-            exchange = @Exchange(value = EXCHANGE_ORDERS),key = ROUTING_ORDERS_CANCEL
+            value = @Queue(value = QUEUE_ORDERS_CANCEL),
+            exchange = @Exchange(value = EXCHANGE_ORDERS), key = ROUTING_ORDERS_CANCEL
     ))
-    public void autoCancel(String message){
-        System.out.println("*****");
-     //   logger.info(message);
+    public void autoCancel(Message message, Channel channel){
+        try{
+            logger.info("dead message  10s 后 消费消息 {}", new String(message.getBody()));
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+        }catch (Exception e){
+            //重新入列，会在队列头部，如果一直不成功，会影响正常业务
+           //channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, true);
+            logger.error("消费异常，message：{}",new String(message.getBody()),e);
+        }
     }
 
     /**
-     *  订单自动确认queue
+     * 订单自动确认queue
+     *
      * @param message
      */
     @RabbitListener(bindings = @QueueBinding(
-            value = @Queue( value = QUEUE_ORDERS_CONFIRM),
-            exchange = @Exchange(value = EXCHANGE_ORDERS),key = ROUTING_ORDERS_CONFIRM
+            value = @Queue(value = QUEUE_ORDERS_CONFIRM),
+            exchange = @Exchange(value = EXCHANGE_ORDERS), key = ROUTING_ORDERS_CONFIRM
     ))
-    public void autoConfirm(String message){
+    public void autoConfirm(String message) {
         logger.info(message);
     }
 
     /**
-     *  订单自动完成queue
+     * 订单自动完成queue
+     *
      * @param message
      */
     @RabbitListener(bindings = @QueueBinding(
-            value = @Queue( value = QUEUE_ORDERS_FINISH),
-            exchange = @Exchange(value = EXCHANGE_ORDERS),key = ROUTING_ORDERS_FINISH
+            value = @Queue(value = QUEUE_ORDERS_FINISH),
+            exchange = @Exchange(value = EXCHANGE_ORDERS), key = ROUTING_ORDERS_FINISH
     ))
-    public void autoFinish(String message){
+    public void autoFinish(String message) {
         logger.info(message);
     }
 
-    /**
-     * test 死信
-     * @param message
-     * @param channel
-     * @throws IOException
-     */
-    @RabbitListener(queues = {QUEUE_ORDERS_CANCEL})
-    public void redirect(Message message, Channel channel) throws IOException {
-        //channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
-        logger.info("dead message  10s 后 消费消息 {}",new String (message.getBody()));
-    }
+
 }
