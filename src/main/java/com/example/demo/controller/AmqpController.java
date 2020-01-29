@@ -32,6 +32,7 @@ public class AmqpController {
 
     @GetMapping("/dead/{msg}")
     public String deadTest(@PathVariable(name = "msg") String msg) throws JsonProcessingException {
+        //为每条消息设置过期时间Per-Message TTL，也可以对queue设置 Queue TTL
         MessagePostProcessor messagePostProcessor = message -> {
             MessageProperties messageProperties = message.getMessageProperties();
             messageProperties.setMessageId(UUID.randomUUID().toString().replaceAll("-", ""));
@@ -41,7 +42,7 @@ public class AmqpController {
             return message;
         };
         Map<String, Object> dataMap = new HashMap<>(16);
-        dataMap.put("msg", "ssss");
+        dataMap.put("msg", msg);
         ObjectMapper mapper = new ObjectMapper();
         String messJson = mapper.writeValueAsString(dataMap);
         rabbitTemplate.convertAndSend(OrdersMqQueue.DEAD_LETTER_EXCHANGE, OrdersMqQueue.DEAD_LETTER_KEY, messJson, messagePostProcessor);

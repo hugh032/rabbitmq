@@ -11,6 +11,7 @@ spring:
     virtual-host: /vhost_hugh
     listener:
       simple:
+        #手动ack
         acknowledge-mode: manual
         #初始连接数量
         concurrency: 5
