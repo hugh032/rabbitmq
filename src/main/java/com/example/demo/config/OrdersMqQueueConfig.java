@@ -64,15 +64,18 @@ public class OrdersMqQueueConfig {
     /**
      * 未支付订单自动取消时间30分钟
      */
-    public static final long CANCEL_TIME = 1000 * 60 * 30;
+    //public static final long CANCEL_TIME = 1000 * 60 * 30;
+    public static final long CANCEL_TIME = 1000 * 10;
     /**
      * 用户确认收货后7天设置为已完成
      */
-    public static final long FINISH_TIME = 1000 * 60 * 60 * 24 * 7;
+    //public static final long FINISH_TIME = 1000 * 60 * 60 * 24 * 7;
+    public static final long FINISH_TIME = 1000 * 10;
     /**
      * 出库后24小时配送单自动签收
      */
-    public static final long CONFIRM_TIME = 1000 * 60 * 60 * 24;
+    //public static final long CONFIRM_TIME = 1000 * 60 * 60 * 24;
+    public static final long CONFIRM_TIME = 1000 * 10;
 
     /**
      * 声明exchange

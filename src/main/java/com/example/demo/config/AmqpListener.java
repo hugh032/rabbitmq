@@ -90,14 +90,14 @@ public class AmqpListener {
             value = @Queue(value = QUEUE_ORDERS_CANCEL),
             exchange = @Exchange(value = EXCHANGE_ORDERS), key = ROUTING_ORDERS_CANCEL
     ))
-    public void autoCancel(Message message, Channel channel){
-        try{
-            logger.info("dead message  10s 后 消费消息 {}", new String(message.getBody()));
+    public void autoCancel(Message message, Channel channel) {
+        try {
+            logger.info(ROUTING_ORDERS_CANCEL+ " _消费消息 {}", new String(message.getBody()));
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
-        }catch (Exception e){
+        } catch (Exception e) {
             //重新入列，会在队列头部，如果一直不成功，会影响正常业务
-           //channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, true);
-            logger.error("消费异常，message：{}",new String(message.getBody()),e);
+            //channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, true);
+            logger.error(ROUTING_ORDERS_CANCEL+ " 消费异常，message：{}", new String(message.getBody()), e);
         }
     }
 
@@ -110,8 +110,13 @@ public class AmqpListener {
             value = @Queue(value = QUEUE_ORDERS_CONFIRM),
             exchange = @Exchange(value = EXCHANGE_ORDERS), key = ROUTING_ORDERS_CONFIRM
     ))
-    public void autoConfirm(String message) {
-        logger.info(message);
+    public void autoConfirm(Message message, Channel channel) {
+        try {
+            logger.info(ROUTING_ORDERS_CONFIRM + " 消费消息 {}", new String(message.getBody()));
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+        } catch (Exception e) {
+            logger.error(ROUTING_ORDERS_CONFIRM + " 消费异常，message：{}", new String(message.getBody()), e);
+        }
     }
 
     /**
@@ -123,8 +128,13 @@ public class AmqpListener {
             value = @Queue(value = QUEUE_ORDERS_FINISH),
             exchange = @Exchange(value = EXCHANGE_ORDERS), key = ROUTING_ORDERS_FINISH
     ))
-    public void autoFinish(String message) {
-        logger.info(message);
+    public void autoFinish(Message message, Channel channel) {
+        try {
+            logger.info(ROUTING_ORDERS_FINISH + " 消费消息 {}", new String(message.getBody()));
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+        } catch (Exception e) {
+            logger.error(ROUTING_ORDERS_FINISH + "消费异常，message：{}", new String(message.getBody()), e);
+        }
     }
 
 

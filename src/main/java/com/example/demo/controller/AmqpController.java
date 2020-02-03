@@ -9,6 +9,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
@@ -31,7 +32,7 @@ public class AmqpController {
     private final static String SUCCESS = "success";
 
     @GetMapping("/dead/{msg}")
-    public String deadTest(@PathVariable(name = "msg") String msg) throws JsonProcessingException {
+    public String deadTest(@PathVariable(name = "msg") String msg, @RequestParam(name="type") String type) throws JsonProcessingException {
         //为每条消息设置过期时间Per-Message TTL，也可以对queue设置 Queue TTL，都设置取偏小的值
         MessagePostProcessor messagePostProcessor = message -> {
             MessageProperties messageProperties = message.getMessageProperties();
@@ -45,7 +46,13 @@ public class AmqpController {
         dataMap.put("msg", msg);
         ObjectMapper mapper = new ObjectMapper();
         String messJson = mapper.writeValueAsString(dataMap);
-        rabbitTemplate.convertAndSend(OrdersMqQueueConfig.DEAD_LETTER_EXCHANGE, OrdersMqQueueConfig.DEAD_LETTER_CANCEL_KEY, messJson, messagePostProcessor);
+        if(type.equals("cancel")){
+            rabbitTemplate.convertAndSend(OrdersMqQueueConfig.DEAD_LETTER_EXCHANGE, OrdersMqQueueConfig.DEAD_LETTER_CANCEL_KEY, messJson, messagePostProcessor);
+        } else if (type.equals("finish")) {
+            rabbitTemplate.convertAndSend(OrdersMqQueueConfig.DEAD_LETTER_EXCHANGE, OrdersMqQueueConfig.DEAD_LETTER_FINISH_KEY, messJson, messagePostProcessor);
+        } else {
+            rabbitTemplate.convertAndSend(OrdersMqQueueConfig.DEAD_LETTER_EXCHANGE, OrdersMqQueueConfig.DEAD_LETTER_CONFIRM_KEY, messJson, messagePostProcessor);
+        }
         return SUCCESS;
     }
 }
