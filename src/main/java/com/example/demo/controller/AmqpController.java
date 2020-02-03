@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.config.OrdersMqQueue;
+import com.example.demo.config.OrdersMqQueueConfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.MessagePostProcessor;
@@ -32,20 +32,20 @@ public class AmqpController {
 
     @GetMapping("/dead/{msg}")
     public String deadTest(@PathVariable(name = "msg") String msg) throws JsonProcessingException {
-        //为每条消息设置过期时间Per-Message TTL，也可以对queue设置 Queue TTL
+        //为每条消息设置过期时间Per-Message TTL，也可以对queue设置 Queue TTL，都设置取偏小的值
         MessagePostProcessor messagePostProcessor = message -> {
             MessageProperties messageProperties = message.getMessageProperties();
             messageProperties.setMessageId(UUID.randomUUID().toString().replaceAll("-", ""));
             messageProperties.setContentEncoding("utf-8");
             //超时时间10秒
-            messageProperties.setExpiration(String.valueOf(1000 * 10));
+            //messageProperties.setExpiration(String.valueOf(1000 * 10));
             return message;
         };
         Map<String, Object> dataMap = new HashMap<>(16);
         dataMap.put("msg", msg);
         ObjectMapper mapper = new ObjectMapper();
         String messJson = mapper.writeValueAsString(dataMap);
-        rabbitTemplate.convertAndSend(OrdersMqQueue.DEAD_LETTER_EXCHANGE, OrdersMqQueue.DEAD_LETTER_KEY, messJson, messagePostProcessor);
+        rabbitTemplate.convertAndSend(OrdersMqQueueConfig.DEAD_LETTER_EXCHANGE, OrdersMqQueueConfig.DEAD_LETTER_CANCEL_KEY, messJson, messagePostProcessor);
         return SUCCESS;
     }
 }
